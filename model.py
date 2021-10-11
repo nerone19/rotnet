@@ -29,6 +29,9 @@ from torch.optim import SGD, Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau,StepLR
 import wandb
 import pdb
+import logging
+from learning_rate_scheduler import LRFinder
+from early_stopping import EarlyStopping
 
 transform = transforms.Compose([
     transforms.ToTensor(),
@@ -42,7 +45,7 @@ sometimes = lambda aug: iaa.Sometimes(0.5, aug)
 transform_seq = iaa.Sequential([
     
  sometimes(iaa.Multiply(0.5)),
- sometimes(iaa.LinearContrast(0.5)),
+ sometimes(iaa.LogContrast(gain=(0.6, 1.4) )),
  sometimes(iaa.GaussianBlur(sigma=1))
  ], random_order= True)
 
@@ -208,7 +211,7 @@ def get_model(pretrained=False):
      
      model.to(device)
      loss_fn = nn.CrossEntropyLoss()
-     optimizer = Adam(model.parameters(), lr=1e-3)
+     optimizer = Adam(model.parameters(), lr=1e-9)
      # optimizer = SGD(model.parameters(), lr=3e-4)
      # scheduler = ReduceLROnPlateau(optimizer, mode="min", patience=3, verbose=True)
      
@@ -230,36 +233,59 @@ def train(data_loader, model, optimizer, scheduler,device,wandb):
     running_loss = 0.0
     tk0 = tqdm(data_loader, total=int(len(data_loader)))
     counter = 0
-    for data in  tk0:
-        images,labels = data
-        inputs =images.to(device,dtype = torch.float)
-        labels =labels.to(device,dtype = torch.long)
-        
-        optimizer.zero_grad()
 
-        outputs = model(inputs)
-        
-        # pdb.set_trace()
-        # loss = F.nll_loss(outputs, labels.view(inputs.size(0)))
-        loss = nn.CrossEntropyLoss()(outputs, labels.view(inputs.size(0)))
-        
-        loss.backward()
-        
-        optimizer.step()
-        
-        running_loss += loss.item() * inputs.size(0)
-        counter +=1
-        tk0.set_postfix(loss=(running_loss / (counter * data_loader.batch_size)))
-        
-    epoch_loss = running_loss / len(data_loader)
-    print('Training Loss: {:.4f}'.format(epoch_loss))
-    wandb.log({'Train Loss': epoch_loss})
+    try:
+        if(device == 'cuda'):
+            scaler = torch.cuda.amp.GradScaler()
+
+        for data in  tk0:
+            images,labels = data
+            # pdb.set_trace()
+            inputs =images.to(device,dtype = torch.float)
+            labels =labels.to(device,dtype = torch.long)
+            
+            optimizer.zero_grad()
+
+            if(device  == 'cuda'):
+                #run in half precision for faster training
+                with torch.cuda.amp.autocast():
+                    outputs = model(inputs)
+                    # loss = F.nll_loss(outputs, labels.view(inputs.size(0)))
+                    loss = nn.CrossEntropyLoss()(outputs, labels.view(inputs.size(0)))
+            
+                #we expect gradient to be in half precision, We have to properly handle these data
+                scaler.scale(loss).backward()
+
+                # scaler.step() first unscales the gradients of the optimizer's assigned params.
+                # If these gradients do not contain infs or NaNs, optimizer.step() is then called,
+                # otherwise, optimizer.step() is skipped.
+                scaler.step(optimizer)
+
+                # Updates the scale for next iteration.
+                scaler.update()
+
+            else: 
+                outputs = model(inputs)
+                # loss = F.nll_loss(outputs, labels.view(inputs.size(0)))
+                loss = nn.CrossEntropyLoss()(outputs, labels.view(inputs.size(0)))
+                loss.backward()
+                
+                optimizer.step()
+            
+            running_loss += loss.item()
+            counter +=1
+            tk0.set_postfix(loss=(running_loss / (counter * data_loader.batch_size)))
+            
+        epoch_loss = running_loss / len(data_loader)
+        print('Training Loss: {:.4f}'.format(epoch_loss))
+        wandb.log({'Train Loss': epoch_loss})
+    except:
+        pass
+
+
+
     
-
-
-
-    
-def evaluate(data_loader,model,device,wandb):
+def evaluate(data_loader,model,device,epoch,wandb):
     
     model.eval()
     
@@ -270,31 +296,79 @@ def evaluate(data_loader,model,device,wandb):
     counter = 0
     with torch.no_grad():
         
-        for data in tk0:
-            images,labels = data
-            inputs =images.to(device,dtype = torch.float)
-            labels =labels.to(device,dtype = torch.long)    
-            labels = labels.view(inputs.size(0))
-            outputs = model.forward(inputs)
-            loss = nn.CrossEntropyLoss()(outputs, labels)
+        try:
+            for data in tk0:
+                images,labels = data
+                inputs =images.to(device,dtype = torch.float)
+                labels =labels.to(device,dtype = torch.long)    
+                labels = labels.view(inputs.size(0))
 
-            outputs = outputs.detach().cpu().numpy()
-            predictions =  np.argmax(outputs,axis =1)
-            
-            final_labels.extend(labels.tolist())
-            final_outputs.extend(predictions.tolist())
+                if(device == 'cuda'):
+                    #run in half precision for faster training
+                    with torch.cuda.amp.autocast():
+                        outputs = model(inputs)
+                        loss = nn.CrossEntropyLoss()(outputs, labels)
 
-            running_loss += loss.item() * inputs.size(0)
-            counter +=1
-            tk0.set_postfix(loss=(running_loss / (counter * data_loader.batch_size)))
+                else: 
+                    outputs = model.forward(inputs)
+                    loss = nn.CrossEntropyLoss()(outputs, labels)
 
-        epoch_loss = running_loss / len(data_loader)
-        scheduler.step(epoch_loss)
-        print('Validation Loss: {:.4f}'.format(epoch_loss))
-        wandb.log({'Valid Loss': epoch_loss})
-        return final_outputs, final_labels
+                outputs = outputs.detach().cpu().numpy()
+                predictions =  np.argmax(outputs,axis =1)
+                
+                final_labels.extend(labels.tolist())
+                final_outputs.extend(predictions.tolist())
+
+                running_loss += loss.item()
+                counter +=1
+                tk0.set_postfix(loss=(running_loss / (counter * data_loader.batch_size)))
+
+            epoch_loss = running_loss / len(data_loader)
+            scheduler.step(epoch_loss)
+            print('Validation Loss: {:.4f}'.format(epoch_loss))
+            wandb.log({'Valid Loss': epoch_loss})
+
+            if(epoch_loss < float(os.environ['best_loss']) ):
+                torch.save({
+                'epoch': epoch,
+                'model_state_dict': model.state_dict(),
+                'optimizer_state_dict': optimizer.state_dict(),
+                'loss': epoch_loss,
+                }, os.path.join(os.environ['log_path'], 'model.pt'))
+        except: 
+            pass
+
+        return final_outputs, final_labels,epoch_loss
         
- 
+
+def test_set_prediction(model,test_path,test_image_list, epoch):
+
+    model.eval()
+
+    if( os.path.isfile(os.path.join(os.environ['log_path'],'test_predictions.txt')) ):
+        mode = 'w'
+    else: 
+        mode = 'a'
+
+    with torch.no_grad():
+
+        with open( os.path.join(os.environ['log_path'],'test_predictions.txt'),mode ) as log_prediction_file:
+            log_prediction_file.writelines('--------------------------PREDICTION FOR EPOCH {} ------------------------------------------------\n'.format(epoch))
+            for image_name in test_image_list:
+                image = cv2.imread( os.path.join(test_path,image_name) )
+                image = image.astype(np.float32)
+                image = resize(image, (64,64))
+                image = torch.tensor(image).unsqueeze(0).permute(0,3,1,2).to(device)/float(os.environ['max-value'])
+                # labels = torch.tensor(labels).to(device)
+                prediction = model(image)
+                prediction = np.argmax(prediction.cpu().detach().numpy(),axis=1)
+                if(prediction > 90):
+                    prediction = 90 - prediction
+                log_prediction_file.writelines(image_name + ' :  ' + str(prediction) + '\n')
+                
+
+
+
 
 #-------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -330,6 +404,7 @@ class RotatedDigitsDataset(Dataset):
         
 
         image = cv2.imread(img_name)
+        # pdb.set_trace()
         image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         image = image.astype(np.float32)
 
@@ -357,28 +432,39 @@ class RotatedDigitsDataset(Dataset):
         #normalize images in [-1,1]
         # image = (image - (float(os.environ['max-value'])/2)) / (float(os.environ['max-value'])/2) 
         #normalize image in [0,1]
-        image = image/float(os.environ['max-value'])
+        # image = image/float(os.environ['max-value'])
         # if(self.transform):
         #     image = self.transform(image)
 
         # pdb.set_trace()
         # torch.tensor(image).unsqueeze(0).to(device),torch.tensor(randomRotation).to(device) 
-        return  torch.tensor(image).permute(2,0,1).to(device),torch.tensor(randomRotation).to(device) 
-    
+        # return  torch.tensor(image).permute(2,0,1).to(device),torch.tensor(randomRotation).to(device) 
+        return np.array(image),randomRotation
+
     def collate_fn(self, batch):
           'logic to modify a batch of images'
           ims, labels = list(zip(*batch))
+
           # transform a batch of images at once
           if self.transform: ims=self.transform.augment_images(images=ims)
-          #to_tensor
-          # ims = torch.tensor(ims)[:,None,:,:].to(device)
+          ims = torch.tensor(ims).permute(0,3,1,2).to(device)/float(os.environ['max-value'])
           # labels = torch.tensor(labels).to(device)
-          return ims, labels
+          return ims, torch.tensor(labels).to(device)
 
 
 image_path = 'D:/additional datasets/OCR/rotation dataset/small'
-# image_path = 'D:/work/office/OCR/rotnet/small dataset'
+test_path = 'D:/additional datasets/OCR/rotation dataset/test/all'
+
+#home pc
+test_path = 'D:/work/office/OCR/rotnet/test'
+image_path = 'D:/work/office/OCR/rotnet/dataset'
+
+
 trainImageList, valImageList = create_train_val_sets(image_path)
+#get test images
+filterFiles = map(lambda key: key, \
+                          filter(lambda el: os.path.isfile(os.path.join(test_path,el)), os.listdir(test_path)))
+testImageList = list(filterFiles)
 
 
 train_set = RotatedDigitsDataset( os.path.join(image_path,'all'),trainImageList,transform_seq)
@@ -396,22 +482,60 @@ val_set = RotatedDigitsDataset(os.path.join(image_path,'all'),valImageList)
 
 
 
-
-trn_dl, val_dl = get_data(train_set,val_set,1)
+mode = 'train'
+trn_dl, val_dl = get_data(train_set,val_set,32)
 model, loss_fn, optimizer,scheduler = get_model(True)
+
+#log dir for storing model training
+curr_dir = os.getcwd()
+log_dir = os.path.join(curr_dir,'logs')
+logging.basicConfig(filename = log_dir+'/log.log')
+
+if(os.path.exists( log_dir ) == False):
+    os.mkdir(log_dir)
+
+os.environ['log_path'] = str(log_dir)
+os.environ['best_loss'] = str(math.inf)
 
 wandb.login()
 wandb.init(project='pytorchw_b')
 wandb.watch(model, log='all')
 since = time.time()
+
+early_stopping = EarlyStopping()
+if(mode == 'finder'):
+    lr_finder = LRFinder(model, optimizer, device, loss_fn)
+    lr_finder.range_test(trn_dl, end_lr=10, num_iter=100, logwandb=True)
+    exit()
+
+
 for epoch in range(1000):
     
+    try:
+        print('starting epoch {}'.format(epoch))
+        train(trn_dl,model,optimizer,scheduler,device,wandb)
+        predictions, valid_labels,val_epoch_loss = evaluate(val_dl,model,device,epoch,wandb)
 
-    print('starting epoch {}'.format(epoch))
-    train(trn_dl,model,optimizer,scheduler,device,wandb)
-    predictions, valid_labels = evaluate(val_dl,model,device,wandb)
-    print('MSE {}'.format(mean_squared_error(predictions, valid_labels)))
-    
+        mse_metric = mean_squared_error(predictions, valid_labels)/len(valid_labels)
+        print('MSE {}'.format(mse_metric))
+
+        if( (epoch % 10 == 0) and epoch > 0):
+            test_set_prediction(model,test_path,testImageList,epoch)
+        wandb.log({'MSE': mse_metric})
+
+        early_stopping(val_epoch_loss)
+        if early_stopping.early_stop:
+            break
+
+    except:
+        print('something happened')
+        logging.error("exception ",exc_info=1) #or
+        torch.save({
+            'epoch': epoch,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict()
+            }, os.path.join(os.environ['log_path'], 'model.pt'))
+        break
     
 time_elapsed = time.time() - since
 print('Training complete in {:.0f}m {:.0f}s'.format(time_elapsed // 60, time_elapsed % 60))

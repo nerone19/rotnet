@@ -1,0 +1,223 @@
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 474, in <module>
+    test_set_prediction(model,testImageList,epoch)
+  File "model.py", line 319, in test_set_prediction
+    if( os.exists(os.path.join(os.environ['log_path'],'test_predictions.txt')) ):
+AttributeError: module 'os' has no attribute 'exists'
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 474, in <module>
+    test_set_prediction(model,testImageList,epoch)
+  File "model.py", line 328, in test_set_prediction
+    for image in os.listdir(test_path):
+TypeError: listdir: path should be string, bytes, os.PathLike or None, not list
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 331, in test_set_prediction
+    prediction = model(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1071, in _call_impl
+    result = forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 249, in forward
+    return self._forward_impl(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 232, in _forward_impl
+    x = self.conv1(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1051, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 443, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 439, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected 4-dimensional input for 4-dimensional weight [64, 3, 7, 7], but got 3-dimensional input of size [3, 402, 311] instead
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "model.py", line 474, in <module>
+    test_set_prediction(model,testImageList,epoch)
+  File "model.py", line 331, in test_set_prediction
+    prediction = model(x)
+KeyboardInterrupt
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 474, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 331, in test_set_prediction
+    prediction = model(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1071, in _call_impl
+    result = forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 249, in forward
+    return self._forward_impl(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 232, in _forward_impl
+    x = self.conv1(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1051, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 443, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 439, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: Expected 4-dimensional input for 4-dimensional weight [64, 3, 7, 7], but got 3-dimensional input of size [3, 402, 311] instead
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 475, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 332, in test_set_prediction
+    prediction = model(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1071, in _call_impl
+    result = forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 249, in forward
+    return self._forward_impl(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 232, in _forward_impl
+    x = self.conv1(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1051, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 443, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 439, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+RuntimeError: expected scalar type Byte but found Float
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 475, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 332, in test_set_prediction
+    prediction = model(x)
+NameError: name 'x' is not defined
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 475, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 332, in test_set_prediction
+    prediction = model(image)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1071, in _call_impl
+    result = forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 249, in forward
+    return self._forward_impl(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 232, in _forward_impl
+    x = self.conv1(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1051, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 443, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 439, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+TypeError: conv2d() received an invalid combination of arguments - got (numpy.ndarray, Parameter, NoneType, tuple, tuple, tuple, int), but expected one of:
+ * (Tensor input, Tensor weight, Tensor bias, tuple of ints stride, tuple of ints padding, tuple of ints dilation, int groups)
+      didn't match because some of the arguments have invalid types: ([31;1mnumpy.ndarray[0m, [31;1mParameter[0m, [31;1mNoneType[0m, [31;1mtuple[0m, [31;1mtuple[0m, [31;1mtuple[0m, [32;1mint[0m)
+ * (Tensor input, Tensor weight, Tensor bias, tuple of ints stride, str padding, tuple of ints dilation, int groups)
+      didn't match because some of the arguments have invalid types: ([31;1mnumpy.ndarray[0m, [31;1mParameter[0m, [31;1mNoneType[0m, [31;1mtuple[0m, [31;1mtuple[0m, [31;1mtuple[0m, [32;1mint[0m)
+
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 469, in <module>
+    train(trn_dl,model,optimizer,scheduler,device,wandb)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 72, in inner_f
+    return f(**kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\metrics\_regression.py", line 255, in mean_squared_error
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\metrics\_regression.py", line 85, in _check_reg_targets
+    y_true = check_array(y_true, ensure_2d=False, dtype=dtype)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 72, in inner_f
+    return f(**kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 650, in check_array
+    raise ValueError("Found array with %d sample(s) (shape=%s) while a"
+ValueError: Found array with 0 sample(s) (shape=(0,)) while a minimum of 1 is required.
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 469, in <module>
+    train(trn_dl,model,optimizer,scheduler,device,wandb)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 72, in inner_f
+    return f(**kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\metrics\_regression.py", line 255, in mean_squared_error
+    y_type, y_true, y_pred, multioutput = _check_reg_targets(
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\metrics\_regression.py", line 85, in _check_reg_targets
+    y_true = check_array(y_true, ensure_2d=False, dtype=dtype)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 72, in inner_f
+    return f(**kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\sklearn\utils\validation.py", line 650, in check_array
+    raise ValueError("Found array with %d sample(s) (shape=%s) while a"
+ValueError: Found array with 0 sample(s) (shape=(0,)) while a minimum of 1 is required.
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 476, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 332, in test_set_prediction
+    prediction = model(image)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1071, in _call_impl
+    result = forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 249, in forward
+    return self._forward_impl(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torchvision\models\resnet.py", line 232, in _forward_impl
+    x = self.conv1(x)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\module.py", line 1051, in _call_impl
+    return forward_call(*input, **kwargs)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 443, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\torch\nn\modules\conv.py", line 439, in _conv_forward
+    return F.conv2d(input, weight, bias, self.stride,
+TypeError: conv2d() received an invalid combination of arguments - got (numpy.ndarray, Parameter, NoneType, tuple, tuple, tuple, int), but expected one of:
+ * (Tensor input, Tensor weight, Tensor bias, tuple of ints stride, tuple of ints padding, tuple of ints dilation, int groups)
+      didn't match because some of the arguments have invalid types: ([31;1mnumpy.ndarray[0m, [31;1mParameter[0m, [31;1mNoneType[0m, [31;1mtuple[0m, [31;1mtuple[0m, [31;1mtuple[0m, [32;1mint[0m)
+ * (Tensor input, Tensor weight, Tensor bias, tuple of ints stride, str padding, tuple of ints dilation, int groups)
+      didn't match because some of the arguments have invalid types: ([31;1mnumpy.ndarray[0m, [31;1mParameter[0m, [31;1mNoneType[0m, [31;1mtuple[0m, [31;1mtuple[0m, [31;1mtuple[0m, [32;1mint[0m)
+
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 478, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 335, in test_set_prediction
+    log_prediction_file.writelines(image + ':  ' + prediction)
+TypeError: unsupported operand type(s) for +: 'Tensor' and 'str'
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 479, in <module>
+    if(epoch % 10 == 0):
+  File "model.py", line 336, in test_set_prediction
+    log_prediction_file.writelines(image + ' :  ' + prediction)
+  File "model.py", line 336, in test_set_prediction
+    log_prediction_file.writelines(image + ' :  ' + prediction)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\bdb.py", line 88, in trace_dispatch
+    return self.dispatch_line(frame)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\bdb.py", line 113, in dispatch_line
+    if self.quitting: raise BdbQuit
+bdb.BdbQuit
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 480, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 336, in test_set_prediction
+    log_prediction_file.writelines(image + ' :  ' + prediction)
+TypeError: unsupported operand type(s) for +: 'Tensor' and 'str'
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 516, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 364, in test_set_prediction
+    log_prediction_file.writelines(image + ' :  ' + prediction)
+TypeError: unsupported operand type(s) for +: 'Tensor' and 'str'
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 516, in <module>
+    test_set_prediction(model,test_path,testImageList,epoch)
+  File "model.py", line 364, in test_set_prediction
+    log_prediction_file.writelines(image_name + ' :  ' + prediction + '\n')
+numpy.core._exceptions.UFuncTypeError: ufunc 'add' did not contain a loop with signature matching types (dtype('<U21'), dtype('<U21')) -> dtype('<U21')
+ERROR:root:exception 
+Traceback (most recent call last):
+  File "model.py", line 519, in <module>
+    print('MSE {}'.format(mse_metric))
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\wandb_run.py", line 1162, in log
+    self.history._row_add(data)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\wandb_history.py", line 44, in _row_add
+    self._flush()
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\wandb_history.py", line 59, in _flush
+    self._callback(row=self._data, step=self._step)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\wandb_run.py", line 906, in _history_callback
+    self._backend.interface.publish_history(
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\interface\interface.py", line 224, in publish_history
+    self._publish_history(history)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\interface\interface.py", line 203, in _publish_history
+    self._publish(rec)
+  File "C:\Users\gabri\AppData\Local\Programs\Python\Python38\lib\site-packages\wandb\sdk\interface\interface.py", line 530, in _publish
+    raise Exception("The wandb backend process has shutdown")
+Exception: The wandb backend process has shutdown
